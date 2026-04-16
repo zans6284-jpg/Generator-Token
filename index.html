@@ -3,209 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Generator</title>
+    <meta name="description" content="Official Token Generator Web - Generate Premium and Login Tokens">
+    <meta name="author" content="Arth">
+    <title>Token Generator Hub</title>
+    
     <style>
-        :root { --primary: #007bff; --success: #28a745; --dark: #343a40; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: var(--dark); }
+        :root { --primary: #007bff; --success: #28a745; --admin-color: #d9534f; --dark: #212529; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; color: var(--dark); margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
         
-        /* Login Style */
+        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
         .input-group { margin-bottom: 15px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { opacity: 0.9; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
         
-        /* Generator Style */
-        #generatorSection { display: none; }
-        .token-card { background: #f8f9fa; border: 2px dashed var(--primary); padding: 15px; margin-top: 20px; border-radius: 10px; position: relative; }
-        .token-text { font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; color: #222; }
-        .copy-btn { position: absolute; right: 10px; top: 10px; background: none; border: none; cursor: pointer; font-size: 18px; width: auto; }
-        .subtitle { font-size: 0.8rem; color: #666; margin-top: 5px; }
-        .limit-info { text-align: right; font-size: 0.85rem; margin-top: 5px; color: #d9534f; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { filter: brightness(0.9); }
+        .btn-gen { background: var(--success); font-size: 1.1rem; }
+
+        /* Token Output */
+        .output-box { display: none; background: #e9ecef; border: 2px dashed var(--primary); padding: 15px; border-radius: 10px; margin-top: 20px; position: relative; }
+        .token-val { font-family: 'Courier New', monospace; font-weight: bold; color: #000; word-break: break-all; padding-right: 30px; }
+        .copy-icon { position: absolute; right: 15px; top: 15px; cursor: pointer; font-size: 20px; }
+        .subtitle { font-size: 0.8rem; color: #666; margin-top: 8px; }
 
         /* Global Output */
-        .global-output { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
-        .global-item { background: white; border-bottom: 1px solid #eee; padding: 10px; font-size: 0.9rem; user-select: none; }
-        .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; color: white; }
-        .bg-admin { background: #d9534f; }
-        .bg-user { background: #5bc0de; }
+        .global-section { margin-top: 40px; }
+        .global-card { background: #fff; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 10px; border-radius: 8px; user-select: none; border-left: 5px solid var(--primary); }
+        .global-card code { color: #e83e8c; font-size: 1rem; }
+
+        /* Admin Section */
+        .admin-panel { margin-top: 50px; padding: 20px; border: 1px solid #ffc107; background: #fff3cd; border-radius: 10px; }
+        .admin-badge { background: var(--admin-color); color: white; padding: 2px 8px; border-radius: 5px; font-size: 12px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loginSection">
-        <h2>Login System</h2>
-        <div class="input-group">
-            <input type="text" id="username" placeholder="Username">
-        </div>
-        <div class="input-group">
-            <input type="email" id="gmail" placeholder="Gmail">
-        </div>
-        <button onclick="handleLogin()">Masuk</button>
+    <div class="header">
+        <h1>Token Generator</h1>
+        <p>Status: <span id="statusUser">Standard User</span> <span id="adminBadge" class="admin-badge">ADMIN</span></p>
     </div>
 
-    <div id="generatorSection">
-        <h2>Token Generator</h2>
-        <p>Welcome, <span id="userDisplay" style="font-weight:bold;"></span> 
-           <span id="roleBadge" class="badge"></span></p>
-
-        <div class="input-group">
-            <label>Durasi:</label>
-            <select id="durationSelect"></select>
-        </div>
-
-        <div class="input-group">
-            <label>Tipe Token:</label>
-            <select id="tokenType">
-                <option value="Premium">Premium</option>
-                <option value="Login">Login</option>
-            </select>
-        </div>
-
-        <button onclick="generateToken()" id="btnGen" style="background: var(--success);">Generate Token</button>
-        <div id="limitText" class="limit-info"></div>
-
-        <div id="resultArea" style="display:none;">
-            <div class="token-card">
-                <div id="tokenOutput" class="token-text"></div>
-                <button class="copy-btn" onclick="copyResult()">📋</button>
-                <div id="subOutput" class="subtitle"></div>
-            </div>
-        </div>
-
-        <div class="global-output">
-            <h3>Global Output (Storage)</h3>
-            <div id="globalContainer"></div>
-        </div>
-        <button onclick="logout()" style="margin-top:20px; background:#666;">Logout</button>
+    <div class="input-group">
+        <label>Username Anda:</label>
+        <input type="text" id="usernameInput" placeholder="Masukkan nama..." value="Guest">
     </div>
-</div>
 
-<script>
-    let session = null;
-    const ADMIN_EMAIL = "zans6284@gmail.com";
-    const ADMIN_USER = "1";
-
-    function handleLogin() {
-        const u = document.getElementById('username').value;
-        const g = document.getElementById('gmail').value;
-
-        if(!u || !g) return alert("Isi semua data!");
-
-        session = {
-            username: u,
-            email: g,
-            isAdmin: (g === ADMIN_EMAIL && u === ADMIN_USER),
-            tokenCount: 0
-        };
-
-        // Simpan ke local agar saat refresh tidak hilang (opsional)
-        showGenerator();
-    }
-
-    function showGenerator() {
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('generatorSection').style.display = 'block';
-        document.getElementById('userDisplay').innerText = session.username;
-        
-        const badge = document.getElementById('roleBadge');
-        const selectDurasi = document.getElementById('durationSelect');
-        
-        // Reset options
-        selectDurasi.innerHTML = `
+    <div class="input-group">
+        <label>Pilih Waktu:</label>
+        <select id="timeSelect">
             <option value="1 Day">1 Day</option>
             <option value="1 Minggu">1 Minggu</option>
             <option value="1 Bulan">1 Bulan</option>
             <option value="1 Tahun">1 Tahun</option>
-        `;
+            </select>
+    </div>
 
-        if(session.isAdmin) {
-            badge.innerText = "OWNER";
-            badge.className = "badge bg-admin";
-            // Tambah opsi permanent untuk admin
-            let opt = document.createElement('option');
-            opt.value = "Permanent";
-            opt.innerHTML = "Permanent";
-            selectDurasi.appendChild(opt);
-        } else {
-            badge.innerText = "USER";
-            badge.className = "badge bg-user";
-        }
+    <div class="input-group">
+        <label>Tipe Token:</label>
+        <select id="typeSelect">
+            <option value="Premium">Premium</option>
+            <option value="Login">Login</option>
+        </select>
+    </div>
 
-        updateLimitUI();
+    <button class="btn-gen" onclick="processGenerate()">Generate Token Now</button>
+    <p id="limitInfo" style="text-align:center; font-size: 0.8rem; color: #666;">Limit: 0/3</p>
+
+    <div id="resultBox" class="output-box">
+        <div id="tokenOutput" class="token-val"></div>
+        <span class="copy-icon" onclick="copyToken()">📋</span>
+        <div id="subOutput" class="subtitle"></div>
+    </div>
+
+    <div class="global-section">
+        <h3>🌐 Global History</h3>
+        <div id="globalList"></div>
+    </div>
+
+    <div class="admin-panel">
+        <label>🔓 Admin Access (Email):</label>
+        <input type="email" id="adminEmailCheck" placeholder="Verify email to unlock permanent..." oninput="checkAdmin()">
+    </div>
+</div>
+
+<script>
+    let isAdmin = false;
+    let count = 0;
+    const ADMIN_TARGET = "zans6284@gmail.com";
+
+    // Load data awal
+    window.onload = () => {
         renderGlobal();
+    };
+
+    function checkAdmin() {
+        const email = document.getElementById('adminEmailCheck').value;
+        const timeSelect = document.getElementById('timeSelect');
+        const badge = document.getElementById('adminBadge');
+        const statusText = document.getElementById('statusUser');
+
+        if (email === ADMIN_TARGET) {
+            isAdmin = true;
+            statusText.innerText = "Owner Access";
+            badge.style.display = "inline";
+            
+            // Tambah opsi permanent jika belum ada
+            if (!document.querySelector('option[value="Permanent"]')) {
+                let opt = document.createElement('option');
+                opt.value = "Permanent";
+                opt.innerHTML = "Permanent";
+                timeSelect.appendChild(opt);
+            }
+        } else {
+            isAdmin = false;
+            statusText.innerText = "Standard User";
+            badge.style.display = "none";
+            // Hapus opsi permanent jika ada
+            Array.from(timeSelect.options).forEach(opt => {
+                if(opt.value === "Permanent") opt.remove();
+            });
+        }
+        updateLimitText();
     }
 
-    function generateToken() {
-        const maxLimit = session.isAdmin ? 10 : 3;
-        
-        if(session.tokenCount >= maxLimit) {
-            alert("Limit token Anda sudah habis!");
-            return;
+    function processGenerate() {
+        const max = isAdmin ? 10 : 3;
+        if (count >= max) return alert("Limit tercapai!");
+
+        const user = document.getElementById('usernameInput').value || "Guest";
+        const time = document.getElementById('timeSelect').value;
+        const type = document.getElementById('typeSelect').value;
+
+        // ALGORITMA RANDOM TOKEN
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Tanpa I dan O agar tidak bingung
+        let randStr = "";
+        for(let i=0; i<10; i++) {
+            randStr += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+        const token = `ART-${type.substring(0,1).toUpperCase()}-${randStr}-${Math.floor(Math.random()*99)}`;
 
-        const durasi = document.getElementById('durationSelect').value;
-        const tipe = document.getElementById('tokenType').value;
-        
-        // KODE ACAK RANDOM & BERBEDA-BEDA
-        const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        let randomPart = "";
-        for(let i=0; i<12; i++) {
-            randomPart += charset.charAt(Math.floor(Math.random() * charset.length));
-        }
-        const finalToken = `ART-${tipe.toUpperCase()}-${randomPart}-${Math.floor(Math.random()*999)}`;
+        // Tampilkan
+        document.getElementById('resultBox').style.display = "block";
+        document.getElementById('tokenOutput').innerText = token;
+        document.getElementById('subOutput').innerText = `${type} | Exp: ${time}`;
 
-        // Tampilkan Hasil
-        document.getElementById('resultArea').style.display = 'block';
-        document.getElementById('tokenOutput').innerText = finalToken;
-        document.getElementById('subOutput').innerText = `${tipe} | Masa aktif: ${durasi}`;
-
-        // Simpan Logika
-        session.tokenCount++;
-        updateLimitUI();
-        saveToGlobal(session.username, finalToken, tipe, durasi, session.isAdmin);
+        count++;
+        updateLimitText();
+        saveLog(user, token, type, time);
     }
 
-    function saveToGlobal(user, token, type, time, isAdmin) {
-        let logs = JSON.parse(localStorage.getItem('global_logs')) || [];
-        logs.unshift({ user, token, type, time, isAdmin });
-        localStorage.setItem('global_logs', JSON.stringify(logs));
+    function saveLog(u, t, tp, tm) {
+        let logs = JSON.parse(localStorage.getItem('token_global_db')) || [];
+        logs.unshift({ u, t, tp, tm });
+        localStorage.setItem('token_global_db', JSON.stringify(logs));
         renderGlobal();
     }
 
     function renderGlobal() {
-        const container = document.getElementById('globalContainer');
-        const logs = JSON.parse(localStorage.getItem('global_logs')) || [];
-        container.innerHTML = '';
+        const list = document.getElementById('globalList');
+        const logs = JSON.parse(localStorage.getItem('token_global_db')) || [];
+        list.innerHTML = '';
 
-        logs.forEach(log => {
+        logs.forEach(item => {
             const div = document.createElement('div');
-            div.className = 'global-item';
+            div.className = 'global-card';
             div.innerHTML = `
-                <b>${log.user}</b> [${log.isAdmin ? 'Admin' : 'User'}] : 
-                <code>${log.token}</code> : 
-                Informasi ${log.type} : ${log.time}
+                <strong>${item.u}</strong> menggenerate: <br>
+                <code>${item.t}</code> <br>
+                <small>Tipe: ${item.tp} | Waktu: ${item.tm}</small>
             `;
-            container.appendChild(div);
+            list.appendChild(div);
         });
     }
 
-    function updateLimitUI() {
-        const max = session.isAdmin ? 10 : 3;
-        document.getElementById('limitText').innerText = `Limit: ${session.tokenCount}/${max}`;
+    function updateLimitText() {
+        const max = isAdmin ? 10 : 3;
+        document.getElementById('limitInfo').innerText = `Limit: ${count}/${max}`;
     }
 
-    function copyResult() {
-        const txt = document.getElementById('tokenOutput').innerText;
-        navigator.clipboard.writeText(txt);
+    function copyToken() {
+        const t = document.getElementById('tokenOutput').innerText;
+        navigator.clipboard.writeText(t);
         alert("Token disalin!");
     }
+</script>
 
-    function logout() {
-        location.reload();
-    }
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Token Generator Hub",
+  "operatingSystem": "All",
+  "applicationCategory": "Utility",
+  "offers": {
+    "@type": "Offer",
+    "price": "0"
+  }
+}
 </script>
 
 </body>
