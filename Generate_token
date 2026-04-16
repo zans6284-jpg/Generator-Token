@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Generator</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        button { background: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
+        
+        /* Token Output Area */
+        .token-box { background: #f8f9fa; border: 2px dashed #007bff; padding: 15px; margin-top: 20px; border-radius: 10px; position: relative; }
+        .token-text { font-family: monospace; font-size: 1.2rem; color: #333; word-break: break-all; }
+        .copy-btn { position: absolute; right: 15px; top: 15px; cursor: pointer; background: none; border: none; font-size: 20px; width: auto; padding: 0; margin: 0; }
+        .subtitle { font-size: 0.85rem; color: #666; margin-top: 5px; }
+
+        /* Global Output Area */
+        .global-section { margin-top: 40px; }
+        .global-item { background: #fff; border-left: 5px solid #007bff; padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-radius: 4px; user-select: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Generate Token</h2>
+    <p>Halo, <b id="displayUser">User</b>!</p>
+
+    <label>Durasi:</label>
+    <select id="duration">
+        <option value="1 Day">1 Day</option>
+        <option value="1 Minggu">1 Minggu</option>
+        <option value="1 Bulan">1 Bulan</option>
+        <option value="1 Tahun">1 Tahun</option>
+        <option value="Permanent">Permanent</option>
+    </select>
+
+    <label>Tipe Token:</label>
+    <select id="type">
+        <option value="Premium">Premium</option>
+        <option value="Login">Login</option>
+    </select>
+
+    <button onclick="generateToken()">Generate</button>
+
+    <div id="outputArea" style="display:none;">
+        <div class="token-box">
+            <div class="token-text" id="generatedToken">TOKEN-XYZ-123</div>
+            <button class="copy-btn" onclick="copyToken()">📋</button>
+            <div class="subtitle" id="tokenSubtitle">Premium | Exp: 1 Day</div>
+        </div>
+    </div>
+
+    <div class="global-section">
+        <h3>Global Output</h3>
+        <div id="globalList"></div>
+    </div>
+</div>
+
+<script>
+    // Ambil user dari login
+    const currentUser = localStorage.getItem('currentUser') || 'Guest';
+    document.getElementById('displayUser').innerText = currentUser;
+
+    function generateToken() {
+        const duration = document.getElementById('duration').value;
+        const type = document.getElementById('type').value;
+        
+        // Membuat string token acak
+        const randomString = Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
+        const fullToken = `TKN-${type.toUpperCase()}-${randomString}`;
+
+        // Update UI Output
+        document.getElementById('outputArea').style.display = 'block';
+        document.getElementById('generatedToken').innerText = fullToken;
+        document.getElementById('tokenSubtitle').innerText = `${type} | Durasi: ${duration}`;
+
+        // Simpan ke Global Output (Storage)
+        saveToGlobal(currentUser, fullToken, type, duration);
+    }
+
+    function saveToGlobal(user, token, type, time) {
+        let globalData = JSON.parse(localStorage.getItem('globalTokens')) || [];
+        const newData = { user, token, type, time };
+        globalData.unshift(newData); // Tambah ke paling atas
+        localStorage.setItem('globalTokens', JSON.stringify(globalData));
+        renderGlobal();
+    }
+
+    function renderGlobal() {
+        const globalList = document.getElementById('globalList');
+        const data = JSON.parse(localStorage.getItem('globalTokens')) || [];
+        globalList.innerHTML = '';
+
+        data.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'global-item';
+            div.innerHTML = `
+                <b>${item.user}</b> menggenerate: <br>
+                <code>${item.token}</code> <br>
+                <small>Tipe: ${item.type} | Durasi: ${item.time}</small>
+            `;
+            globalList.appendChild(div);
+        });
+    }
+
+    function copyToken() {
+        const tokenText = document.getElementById('generatedToken').innerText;
+        navigator.clipboard.writeText(tokenText);
+        alert("Token disalin ke clipboard!");
+    }
+
+    // Jalankan render saat halaman dimuat
+    renderGlobal();
+</script>
+
+</body>
+</html>
